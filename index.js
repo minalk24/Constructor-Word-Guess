@@ -1,72 +1,142 @@
 var Word = require("./Word");
 var inquirer = require("inquirer");
+var Chalk = require("chalk");
 
-var game = function () {
-    var cities = ["san francisco", "fremont", "berkeley"];
-    totalGuesses = 10;
-    var wordForGuess = new Word(cities[Math.floor(Math.random() * cities.length)]);
-    var sofarGuessedLetter = []
-    console.log(wordForGuess.getWord());
-    guessingStart();
+//instructional text
+console.log("--------------------" + "\n" +
+    "Guess word" + "\n" +
+    "--------------------" + "\n");
+
+// variables
+var totalPredicts;
+var wordToPredict;
+var alreadyPredictedLetters;
+var score = 0;
+var questionCount = 0;
+var selectedArray;
+
+function startGame() {
+
+    var states = ["california", "hawaii", "alaska", "texas", "washington", "oregon", "utah", "nevada", "arizona", "maine", "florida", "ohio"];
+    var countries = ["unitedstates", "canada", "mexico", "norway", "india", "peru", "china", "japan", "russia"];
+
+    totalPredicts = 10;
+
+    if (Math.floor(Math.random() * 2) === 0) {
+        wordToPredict = new Word(states[Math.floor(Math.random() * states.length)]);
+        selectedArray = 0;
+    }
+
+    else {
+        wordToPredict = new Word(countries[Math.floor(Math.random() * countries.length)]);
+        selectedArray = 1;
+    }
+
+    alreadyPredictedLetters = [];
+
+    if (selectedArray === 0)
+        console.log(Chalk.bold("\nState: " + wordToPredict.getWord()));
+    else
+        console.log(Chalk.bold("\nCountry: " + wordToPredict.getWord()));
+
+    questionCount++;
+
+    startPredicting();
 }
 
-var guessingStart = function () {
-    if (totalGuesses < 0) {
+function startPredicting() {
+
+    if (totalPredicts > 0) {
+
         inquirer.prompt([{
-            type: "input",
             message: "Guess a letter",
-            name: "letterGuessed",
+            name: "predictedLetter",
+            type: "input",
             validate: function (value) {
-                if (value.toLowerCase() !== value.toUpperCase()) {
+                if (value.toLowerCase() !== value.toUpperCase() && value.length === 1 && alreadyPredictedLetters.indexOf(value.toLowerCase()) === -1) {
                     return true;
                 }
                 return false;
             }
         }]).then(function (response) {
-            if (sofarGuessedLetter.indexOf(response.letterGuessed) === -1) {
-                sofarGuessedLetter.push(response.letterGuessed);
-                var beforeGuessWord = wordForGuess.getWord();
-                wordForGuess.guessWord(response.letterGuessed);
-                console.log(wordForGuess.getWord());
-                var afterGuessWord = wordForGuess.getWord();
+
+            if (alreadyPredictedLetters.indexOf(response.predictedLetter.toLowerCase()) === -1) {
+
+                alreadyPredictedLetters.push(response.predictedLetter.toLowerCase());
+
+                var beforeGuessWord = wordToPredict.getWord();
+
+                wordToPredict.guessWord(response.predictedLetter.toLowerCase());
+
+
+                if (selectedArray === 0)
+
+                    console.log(Chalk.bold("\nState: " + wordToPredict.getWord()));
+
+                else
+
+                    console.log(Chalk.bold("\nCountry: " + wordToPredict.getWord()));
+
+
+                var afterGuessWord = wordToPredict.getWord();
+
+
+                console.log("Already predicted letters: " + alreadyPredictedLetters.join(','));
+
+
                 if (beforeGuessWord === afterGuessWord) {
-                    console.log("Wrong guess");
-                    totalGuesses--;
-                    if (totalGuesses === 0) {
-                        console.log("No more chance for guess")
+
+
+                    console.log(Chalk.bold("Wrong guess"));
+
+
+                    totalPredicts--;
+
+
+                    if (totalPredicts === 0) {
+
+                        console.log("No chance left to predict!!");
+
+                        console.log("Right answer was: " + wordToPredict.displayWord());
+
+                        console.log("Your Score: " + score + "/" + questionCount);
+
                     }
                     else
-                        console.log("Guesses left: " + totalGuesses);
+                        console.log("Guesses left: " + totalPredicts);
                 }
-                if (wordForGuess.getWord().indexOf("_") !== -1)
-                    guessingStart();
+
+                if (wordToPredict.getWord().indexOf("_") !== -1)
+                    startPredicting();
                 else {
-                    console.log("You guessed right word");
-                    askPlayAgain();
+
+                    console.log("You predicted the right word!!");
+
+                    score++;
+                    console.log("Your Score: " + score + "/" + questionCount);
+
+                    wannaPlayAgain();
                 }
-            }
-            else {
-                console.log("Already guessed letter")
-                guessingStart();
             }
         });
     }
+
     else {
-    askToPlayAgain();
+
+        wannaPlayAgain();
     }
 }
-game();
 
-function askToPlayAgain() {
+startGame();
+
+function wannaPlayAgain() {
     inquirer.prompt([{
-        type: "confirm",
-        name: "playAgain",
         message: "Play more?",
+        name: "playAgain",
+        type: "confirm",
         default: false
     }]).then(function (response) {
-        wordForGuess.guessWord(response.letterGuessed);
-        console.log(wordForGuess.getWord());
+        if (response.playAgain)
+            startGame();
     });
-    if (response.playAgain)
-    game();
 }
