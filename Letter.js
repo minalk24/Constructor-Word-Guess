@@ -1,16 +1,20 @@
 var Letter = function(char){
     this.char = char;
-    this.guessed = false;
-    this.toString = function(){
-        if(this.guessed)
+    this.predicted = false;
+    this.getLetter = function(){
+        if(this.predicted)
             return this.char;
         else
             return "_";
     };
     this.guessLetter =  function(char){
         if(this.char === char)
-            this.guessed = true;
+            this.predicted = true;
     };
+    this.displayLetter = function(char){
+        return this.char;
+    }
 };
 
-module.exports = Letter; 
+//export the module
+module.exports = Letter;
