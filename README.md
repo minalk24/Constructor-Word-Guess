@@ -11,8 +11,12 @@
     * [Inquirer](https://www.npmjs.com/package/inquirer)
     * [Chalk](https://www.npmjs.com/package/chalk)
 
+## Constructor Word Guess in Action:
+
+![demo gif](game.gif "Demo GIF")
+
 ## License
 Standard MIT License
 
-##Author
+## Author
 Minal Kharche
